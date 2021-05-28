@@ -9,6 +9,7 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Description = Jira connector application using Plotly-Dash
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A909DCBB-C9ED-4CCB-B6F3-1C362716F708}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
