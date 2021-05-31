@@ -7,9 +7,9 @@ import dash_html_components as html
 import dash_table
 import warnings
 from jira import JIRA
-
 import pandas as pd
 from datetime import datetime
+import plotly.graph_objs as go
 
 warnings.filterwarnings('ignore')
 
@@ -83,7 +83,32 @@ app.layout = html.Div([
     html.Div([html.Span([html.Button("Download Raw File", id="rawFile"), dcc.Download(id="downloadRawFile")], style={'marginLeft': '20px'}),
               html.Span([html.Button("Download Log File", id="logFile"), dcc.Download(id="downloadLogFile")], style={'marginLeft': '10%'}),
               html.Span([html.Button("Download Summary", id="summaryFile"), dcc.Download(id="downloadSummaryFile")], style={'marginLeft': '10%'})
-    ])
+    ]),
+
+    html.Br(),
+    html.Br(),
+
+    html.Div([
+        dcc.Dropdown(
+            id = 'names', 
+            options = [{'label': 'Bilal Khan', 'value': 'Muhammad Bilal Khan'}, {'label': 'Moiz Anwer', 'value': 'Moiz anwer'}], 
+            placeholder = 'Select user', 
+            multi = True
+        )
+    ],
+        style = {'display' : 'inline-block', 'verticalAlign' : 'top', 'width' : '30%', 'margin-left': '20px'}
+    ),
+    html.Div([
+        dcc.Dropdown(
+            id = 'graph',
+            options = [{'label': 'Line plot', 'value': 'Line'}, {'label': 'Bubble plot', 'value': 'Bubble'}, {'label': 'Bar plot', 'value': 'Bar'}, {'label': 'Heatmap', 'value': 'Heatmap'}],
+            value = 'Line',
+            multi = False
+        )
+    ],
+        style = {'display': 'inline-block', 'verticalAlign': 'top', 'width': '30%', 'margin-left': '30px'}
+    ),
+    dcc.Graph(id='overall-graph')
 
 ])
 
@@ -161,9 +186,115 @@ def changeTable(click):
             )]), html.Div(style={'display': 'None'})
         ]
 
+#@app.callback(Output('overall-graph', 'figure'),
+#              Input('names', 'value'),
+#              Input('graph', 'value'))
+#def selectName (names, graph):
+#    global workLogAlpha
+#    mode = 'lines+markers'
+#    marker = {'size': 12, 'symbol': 'circle-dot'}
+
+#    data = [
+#        go.Scatter(
+#            x = workLogAlpha['Assignee'],
+#            y = workLogAlpha['Time spent'],
+#            mode = mode,
+#            marker = marker
+#        )
+#    ]
+    
+#    if graph == 'Bubble':
+#        mode = 'markers'
+#        marker = dict(size=3*tempNameList['Time spent'])
+#        data = [
+#            go.Scatter(
+#                x = workLogAlpha['Assignee'],
+#                y = workLpgAlpga['Time spent'],
+#                mode = mode,
+#                marker = marker
+#            )
+#        ]
+#    elif graph == 'Bar':
+#        data = [
+#            go.Bar(
+#                x = workLogAlpha['Assignee'],
+#                y = workLpgAlpga['Time spent'],
+#                marker = {'color': 'rgb(51,204,153)'}
+#            )
+#        ]
+#    elif graph == 'Heatmap':
+#        data = [
+#            go.Heatmap(
+#            x = workLogAlpha['Assignee'],
+#            y = workLpgAlpga['Time spent'],
+#            z = workLpgAlpga['Time spent'],
+#            colorscale = 'Jet',
+#            zmin = 5, zmax = 40 # add max/min color values to make each plot consistent
+#            )
+#        ] 
+
+#    figure = {
+#            'data': data,
+#            'layout': go.Layout(
+#                title = 'Overall Time Spent',
+#                xaxis = {'title': 'Assignee'},
+#                yaxis = {'title': 'Utilization'},
+#                hovermode='closest'
+#            )
+#        }
+
+#    if names is not None:
+#        if len(names):
+#            # traces = []
+#            data.clear()
+            
+#            for name in names:
+#                tempNameList = workLogAlpha[workLogAlpha.Assignee == name]
+#                if graph == 'Bubble':
+#                    mode = 'markers'
+#                    marker = dict(size=3*tempNameList['Time spent'])
+#                    data.append(go.Scatter(
+#                        x = tempNameList.Assignee,
+#                        y = tempNameList['Time spent'],
+#                        mode = mode,
+#                        name = name,
+#                        marker = marker
+#                    ))
+#                elif graph == 'Bar':
+#                    data.append(go.Bar(
+#                        x = tempNameList.Assignee,
+#                        y = tempNameList['Time spent'],
+#                        name = name
+#                    ))
+#                elif graph == 'Heatmap':
+#                    data.append(go.Heatmap(
+#                        x=tempNameList.Assignee,
+#                        y=tempNameList['Time spent'],
+#                        z=tempNameList['Time spent'],
+#                        colorscale='Jet',
+#                        zmin = 40, zmax = 100,
+#                        name = name
+#                    ))
+#                else:
+#                    data.append(go.Scatter(
+#                        x = tempNameList.Assignee,
+#                        y = tempNameList['Time spent'],
+#                        mode = mode,
+#                        name = name,
+#                        marker = marker
+#                    ))
+#                # traces.append(data)
+#            fig = {'data': data, 'layout': go.Layout(title = 'Overall Time Spent', xaxis = {'title': 'Assignee'}, yaxis = {'title': 'Utilization'}, hovermode='closest')}
+    #        return fig
+    #    else:
+    #        return figure
+    #else:
+    #    return figure
+
 @app.callback([
     Output('dashboard', 'data'),
     Output('loading', 'children'),
+    Output('overall-graph', 'figure'),
     Input('daysSlider', 'value')
 ])
 def jiraConnector(days):
@@ -180,7 +311,6 @@ def jiraConnector(days):
     jira = JIRA(options={'server': 'https://qordatainc.atlassian.net/'}, basic_auth=('bilal.khan@qordata.com', 'yaeSBwTTcPI3CdpPUG2G2D28'))
     jql='worklogDate >= -'+str(days)+'d'
 
-    # Container for Jira's data
     data_jira = []
     work_log = []
 
@@ -191,30 +321,21 @@ def jiraConnector(days):
         if(len(jira_search) == 0): 
             break
 
-        # Iterate over the issues
         for issue in jira_search:
-            # Get issue key
             issue_key = issue.key
 
-            # Get issue summary
             issue_summary = issue.fields.summary
 
-            # Get request type
             request_type = str(issue.fields.issuetype)
 
-            # Get datetime creation
             datetime_creation = issue.fields.created
             if datetime_creation is not None:
-                # Interested in only seconds precision, so slice unnecessary part
                 datetime_creation = datetime.strptime(datetime_creation[:19], "%Y-%m-%dT%H:%M:%S")
 
-            # Get datetime resolution
             datetime_resolution = issue.fields.resolutiondate
             if datetime_resolution is not None:
-                # Interested in only seconds precision, so slice unnecessary part
                 datetime_resolution = datetime.strptime(datetime_resolution[:19], "%Y-%m-%dT%H:%M:%S")
 
-            # Get reporter’s login and name
             reporter_login = None
             reporter_name = None
             reporter = issue.raw['fields'].get('reporter', None)
@@ -222,7 +343,6 @@ def jiraConnector(days):
                 reporter_login = reporter.get('key', None)
                 reporter_name = reporter.get('displayName', None)
 
-            # Get assignee’s login and name
             assignee_login = None
             assignee_name = None
             assignee = issue.raw['fields'].get('assignee', None)
@@ -230,23 +350,19 @@ def jiraConnector(days):
                 assignee_login = assignee.get('key', None)
                 assignee_name = assignee.get('displayName', None)
 
-            # Get status
             status = None
             st = issue.fields.status
             if st is not None:
                 status = st.name
 
-            # Time logging
             issue_workratio = issue.fields.workratio
             issue_timespent = issue.fields.timespent
             issue_estimate = issue.fields.timeoriginalestimate
 
-            # Add data to data frame
             data_jira.append((issue_key, issue_summary, request_type, datetime_creation, datetime_resolution, reporter_login, reporter_name, assignee_login, assignee_name, status, issue_workratio, issue_timespent, issue_estimate))
             work_log.append((issue_key, issue_summary, assignee_name, issue_estimate, issue_timespent))
 
         initial = initial + 1
-        print(len(data_jira))
 
     jiraData = pd.DataFrame(data_jira, columns=['Issue key', 'Summary', 'Request type', 'Datetime creation', 'Datetime resolution', 'Reporter login', 'Reporter name', 'Assignee login', 'Assignee name', 'Status', 'Work raito', 'Time spent', 'Estimate'])
     workLog = pd.DataFrame(work_log, columns=['Issue key', 'Summary', 'Assignee', 'Estimate', 'Time spent'])
@@ -283,9 +399,29 @@ def jiraConnector(days):
     workLogAlpha['Time spent'] = workLogAlpha['Time spent'].round(2)
     workLog['Assignee'] = workLog['Assignee'].str.replace('.', ' ')
     workLog['Assignee'] = workLog['Assignee'].str.capitalize()
-    #workLog[['Time spent', 'Estimate']] = workLog[['Time spent', 'Estimate']].div(3600)
 
-    return [workLog.to_dict('records'), html.Div(style={'display': 'None'})]
+    trace1 = go.Bar(
+                    x = workLogAlpha['Assignee'],
+                    y = workLogAlpha['Estimate'],
+                    marker = {'color': 'rgb(199, 153, 185)'},
+                    name = 'Estimate'
+             )
+    trace2 = go.Bar(
+                    x = workLogAlpha['Assignee'],
+                    y = workLogAlpha['Time spent'],
+                    marker = {'color': 'darkviolet'},
+                    name = 'Time spent'
+             )
+    figure = {
+            'data': [trace1, trace2],
+            'layout': go.Layout(
+                title = 'Overall Time Spent',
+                xaxis = {'title': 'Assignee'},
+                yaxis = {'title': 'Utilization'},
+                hovermode='closest'
+            )
+        }
+    return [workLog.to_dict('records'), html.Div(style={'display': 'None'}), figure]
 
 
 if __name__ == '__main__':
