@@ -9,6 +9,9 @@ import warnings
 from jira import JIRA
 import pandas as pd
 from datetime import datetime
+from datetime import date
+from datetime import timedelta
+import pyodbc
 import plotly.graph_objs as go
 
 warnings.filterwarnings('ignore')
@@ -19,6 +22,7 @@ jiraData = pd.DataFrame()
 workLog = pd.DataFrame()
 workLogAlpha = pd.DataFrame()
 dayCount = 0
+option = []
 
 app.layout = html.Div([
     
@@ -91,24 +95,24 @@ app.layout = html.Div([
     html.Div([
         dcc.Dropdown(
             id = 'names', 
-            options = [{'label': 'Bilal Khan', 'value': 'Muhammad Bilal Khan'}, {'label': 'Moiz Anwer', 'value': 'Moiz anwer'}], 
+            options = option, 
             placeholder = 'Select user', 
             multi = True
         )
     ],
-        style = {'display' : 'inline-block', 'verticalAlign' : 'top', 'width' : '30%', 'margin-left': '20px'}
+        style = {'display' : 'inline-block', 'verticalAlign' : 'top', 'width' : '30%', 'marginLeft': '20px'}
     ),
     html.Div([
         dcc.Dropdown(
-            id = 'graph',
+            id = 'graphs',
             options = [{'label': 'Line plot', 'value': 'Line'}, {'label': 'Bubble plot', 'value': 'Bubble'}, {'label': 'Bar plot', 'value': 'Bar'}, {'label': 'Heatmap', 'value': 'Heatmap'}],
-            value = 'Line',
+            placeholder = 'Select graph',
             multi = False
         )
     ],
-        style = {'display': 'inline-block', 'verticalAlign': 'top', 'width': '30%', 'margin-left': '30px'}
+        style = {'display': 'inline-block', 'verticalAlign': 'top', 'width': '30%', 'marginLeft': '30px'}
     ),
-    dcc.Graph(id='overall-graph')
+    html.Div(children=[dcc.Graph(id='overall-graph')], style={'marginLeft': '20px'}, id='graphsDiv')
 
 ])
 
@@ -186,119 +190,141 @@ def changeTable(click):
             )]), html.Div(style={'display': 'None'})
         ]
 
-#@app.callback(Output('overall-graph', 'figure'),
-#              Input('names', 'value'),
-#              Input('graph', 'value'))
-#def selectName (names, graph):
-#    global workLogAlpha
-#    mode = 'lines+markers'
-#    marker = {'size': 12, 'symbol': 'circle-dot'}
+@app.callback(Output('graphsDiv', 'children'),
+              Input('names', 'value'),
+              Input('graphs', 'value'),
+              prevent_initial_call=True
+)
+def selectName (names, graph):
+    global workLogAlpha
 
-#    data = [
-#        go.Scatter(
-#            x = workLogAlpha['Assignee'],
-#            y = workLogAlpha['Time spent'],
-#            mode = mode,
-#            marker = marker
-#        )
-#    ]
+    mode = 'lines+markers'
+    marker = {'size': 12, 'symbol': 'circle-dot', 'color': 'darkviolet'}
+
+    trace1 = go.Bar(
+                    x = workLogAlpha['Assignee'],
+                    y = workLogAlpha['Estimate'],
+                    marker = {'color': 'rgb(199, 153, 185)'},
+                    name = 'Estimate'
+    )
+    trace2 = go.Bar(
+                    x = workLogAlpha['Assignee'],
+                    y = workLogAlpha['Time spent'],
+                    marker = {'color': 'darkviolet'},
+                    name = 'Time spent'
+    )
+    data = [trace1, trace2]
     
-#    if graph == 'Bubble':
-#        mode = 'markers'
-#        marker = dict(size=3*tempNameList['Time spent'])
-#        data = [
-#            go.Scatter(
-#                x = workLogAlpha['Assignee'],
-#                y = workLpgAlpga['Time spent'],
-#                mode = mode,
-#                marker = marker
-#            )
-#        ]
-#    elif graph == 'Bar':
-#        data = [
-#            go.Bar(
-#                x = workLogAlpha['Assignee'],
-#                y = workLpgAlpga['Time spent'],
-#                marker = {'color': 'rgb(51,204,153)'}
-#            )
-#        ]
-#    elif graph == 'Heatmap':
-#        data = [
-#            go.Heatmap(
-#            x = workLogAlpha['Assignee'],
-#            y = workLpgAlpga['Time spent'],
-#            z = workLpgAlpga['Time spent'],
-#            colorscale = 'Jet',
-#            zmin = 5, zmax = 40 # add max/min color values to make each plot consistent
-#            )
-#        ] 
+    if graph == 'Bubble':
+        mode = 'markers'
+        marker = dict(size=3*workLogAlpha['Time spent'])
+        data = [
+            go.Scatter(
+                x = workLogAlpha['Assignee'],
+                y = workLogAlpha['Time spent'],
+                mode = mode,
+                marker = marker
+            )
+        ]
+    elif graph == 'Bar':
+        data = [
+            go.Bar(
+                x = workLogAlpha['Assignee'],
+                y = workLogAlpha['Time spent'],
+                marker = {'color': 'darkviolet'}
+            )
+        ]
+    elif graph == 'Heatmap':
+        data = [
+            go.Heatmap(
+            x = workLogAlpha['Assignee'],
+            y = workLogAlpha['Time spent'],
+            z = workLogAlpha['Time spent'],
+            colorscale = 'Jet',
+            zmin = 5, zmax = 40 # add max/min color values to make each plot consistent
+            )
+        ] 
+    elif graph == 'Line':
+        data = [
+            go.Scatter(
+                x = workLogAlpha['Assignee'],
+                y = workLogAlpha['Time spent'],
+                mode = mode,
+                marker = marker
+            )]
 
-#    figure = {
-#            'data': data,
-#            'layout': go.Layout(
-#                title = 'Overall Time Spent',
-#                xaxis = {'title': 'Assignee'},
-#                yaxis = {'title': 'Utilization'},
-#                hovermode='closest'
-#            )
-#        }
+    figure = {
+            'data': data,
+            'layout': go.Layout(
+                title = 'Overall Time Spent',
+                xaxis = {'title': 'Assignee'},
+                yaxis = {'title': 'Utilization'},
+                hovermode='closest'
+            )
+        }
 
-#    if names is not None:
-#        if len(names):
-#            # traces = []
-#            data.clear()
+    if names is not None:
+        if len(names):
+            # traces = []
+            data.clear()
             
-#            for name in names:
-#                tempNameList = workLogAlpha[workLogAlpha.Assignee == name]
-#                if graph == 'Bubble':
-#                    mode = 'markers'
-#                    marker = dict(size=3*tempNameList['Time spent'])
-#                    data.append(go.Scatter(
-#                        x = tempNameList.Assignee,
-#                        y = tempNameList['Time spent'],
-#                        mode = mode,
-#                        name = name,
-#                        marker = marker
-#                    ))
-#                elif graph == 'Bar':
-#                    data.append(go.Bar(
-#                        x = tempNameList.Assignee,
-#                        y = tempNameList['Time spent'],
-#                        name = name
-#                    ))
-#                elif graph == 'Heatmap':
-#                    data.append(go.Heatmap(
-#                        x=tempNameList.Assignee,
-#                        y=tempNameList['Time spent'],
-#                        z=tempNameList['Time spent'],
-#                        colorscale='Jet',
-#                        zmin = 40, zmax = 100,
-#                        name = name
-#                    ))
-#                else:
-#                    data.append(go.Scatter(
-#                        x = tempNameList.Assignee,
-#                        y = tempNameList['Time spent'],
-#                        mode = mode,
-#                        name = name,
-#                        marker = marker
-#                    ))
-#                # traces.append(data)
-#            fig = {'data': data, 'layout': go.Layout(title = 'Overall Time Spent', xaxis = {'title': 'Assignee'}, yaxis = {'title': 'Utilization'}, hovermode='closest')}
-    #        return fig
-    #    else:
-    #        return figure
-    #else:
-    #    return figure
+            for name in names:
+                tempNameList = workLogAlpha[workLogAlpha.Assignee == name]
+                if graph == 'Bubble':
+                    mode = 'markers'
+                    marker = dict(size=3*tempNameList['Time spent'])
+                    data.append(go.Scatter(
+                        x = tempNameList.Assignee,
+                        y = tempNameList['Time spent'],
+                        mode = mode,
+                        name = name,
+                        marker = marker
+                    ))
+                elif graph == 'Bar':
+                    data.append(go.Bar(
+                        x = tempNameList.Assignee,
+                        y = tempNameList['Time spent'],
+                        name = name
+                    ))
+                elif graph == 'Heatmap':
+                    data.append(go.Heatmap(
+                        x=tempNameList.Assignee,
+                        y=tempNameList['Time spent'],
+                        z=tempNameList['Time spent'],
+                        colorscale='Jet',
+                        zmin = 40, zmax = 100,
+                        name = name
+                    ))
+                elif graph == 'Line':
+                    data.append(go.Scatter(
+                        x = tempNameList.Assignee,
+                        y = tempNameList['Time spent'],
+                        name = name,
+                        mode = mode,
+                        marker = marker
+                    ))
+                else:
+                    data.append(go.Bar(
+                        x = tempNameList.Assignee,
+                        y = tempNameList['Time spent'],
+                        name = name,
+                    ))
+            fig = {'data': data, 'layout': go.Layout(title = 'Overall Time Spent', xaxis = {'title': 'Assignee'}, yaxis = {'title': 'Utilization'}, hovermode='closest')}
+            return [dcc.Graph(id='overall-graph', figure=fig)]
+        else:
+            return [dcc.Graph(id='overall-graph', figure=figure)]
+    else:
+        return [dcc.Graph(id='overall-graph', figure=figure)]
 
 @app.callback([
     Output('dashboard', 'data'),
     Output('loading', 'children'),
     Output('overall-graph', 'figure'),
+    Output('names', 'options'),
     Input('daysSlider', 'value')
 ])
 def jiraConnector(days):
-    global jiraData, workLog, workLogAlpha, dayCount
+    global jiraData, workLog, workLogAlpha, dayCount, option
 
     if days == dayCount:
         raise PreventUpdate
@@ -313,6 +339,12 @@ def jiraConnector(days):
 
     data_jira = []
     work_log = []
+    option.clear()
+    defaultDf = pd.read_excel('Members.xlsx')
+    defaultDf['Assignee'] = defaultDf['Assignee'].str.replace('Muhammad ', '')
+    defaultDf['Assignee'] = defaultDf['Assignee'].str.title()
+    #defaultDf['End Date'] = date.today()
+    #defaultDf['Start Date'] = date.today() - timedelta(days=days)
 
     while True:
         start = initial * size
@@ -373,10 +405,10 @@ def jiraConnector(days):
 
     workLogAlpha = workLog.groupby(['Assignee']).sum()
     workLogAlpha[['Time spent', 'Estimate']] = workLogAlpha[['Time spent', 'Estimate']].div(3600) 
-    workLogAlpha['Utilization'] = workLogAlpha['Time spent'].div(80).round(4)    
+    workLogAlpha['Utilization'] = workLogAlpha['Time spent'].div(80).round(4)
+    workLogAlpha['Estimate'] = workLogAlpha['Estimate'].div(80).round(4)
     workLogAlpha.reset_index(inplace=True)
     workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.replace('.', ' ')
-    workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.capitalize()
     writer = pd.ExcelWriter('Summary.xlsx', engine='xlsxwriter')
     workLogAlpha.to_excel(writer, index=False, sheet_name='Report')
     workbook = writer.book
@@ -394,11 +426,30 @@ def jiraConnector(days):
     writer.save()
     
     workLogAlpha['Utilization'] = workLogAlpha['Utilization'].mul(100).round(2)
-    workLogAlpha['Utilization'] = workLogAlpha['Utilization'].astype(str) + '%'
-    workLogAlpha['Estimate'] = workLogAlpha['Estimate'].round(2)
+    #workLogAlpha['Utilization'] = workLogAlpha['Utilization'].astype(str) + '%'
+    workLogAlpha['Estimate'] = workLogAlpha['Estimate'].mul(100).round(2)
+    #workLogAlpha['Estimate'] = workLogAlpha['Estimate'].astype(str) + '%'
     workLogAlpha['Time spent'] = workLogAlpha['Time spent'].round(2)
+    workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.title()
+    workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.replace('Muhammad ', '')
+    defaultDf = workLogAlpha.set_index('Assignee').combine_first(defaultDf.drop_duplicates().set_index('Assignee')).reset_index()
+    defaultDf.drop(['Time spent'], axis=1, inplace=True)
+    defaultDf['End Date'] = date.today()
+    defaultDf['Start Date'] = date.today() - timedelta(days=int(days))
+    defaultDf.to_excel('Database Entry.xlsx')
     workLog['Assignee'] = workLog['Assignee'].str.replace('.', ' ')
-    workLog['Assignee'] = workLog['Assignee'].str.capitalize()
+    workLog['Assignee'] = workLog['Assignee'].str.title()
+
+    server = 'PROD-LPT-69' 
+    database = 'Cost' 
+    conn = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER="+server+';DATABASE='+database+';Trusted_Connection=yes;')
+    cursor = conn.cursor()
+    #cursor.execute("TRUNCATE TABLE DeliveryTeamReport")
+    for index, row in defaultDf.iterrows():
+        cursor.execute("INSERT INTO DeliveryTeamReportV2 (Team, Name, Allocation, Utilization, StartDate, EndDate) values(?,?,?,?,?,?);", 
+                       str(row.Team), str(row.Assignee), float(row['Estimate']), float(row['Utilization']), row['Start Date'], row['End Date'])
+    conn.commit()
+    cursor.close()
 
     trace1 = go.Bar(
                     x = workLogAlpha['Assignee'],
@@ -421,7 +472,14 @@ def jiraConnector(days):
                 hovermode='closest'
             )
         }
-    return [workLog.to_dict('records'), html.Div(style={'display': 'None'}), figure]
+
+    for name in workLogAlpha.Assignee:
+        nameDict = {}
+        nameDict['label'] = name
+        nameDict['value'] = name
+        option.append(nameDict)
+
+    return [workLog.to_dict('records'), html.Div(style={'display': 'None'}), figure, option]
 
 
 if __name__ == '__main__':
