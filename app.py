@@ -54,7 +54,8 @@ app.layout = html.Div([
 
     html.Br(),
 
-    html.Div([html.Button('Switch Table', id='convert')], style={'marginLeft': '20px'}),
+    html.Div(children=[html.Button('Switch Table', id='convert'), html.Span(id='ticketCount', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'20px'})], 
+             style={'marginLeft': '20px'}),
     
     html.Br(),
     
@@ -112,7 +113,27 @@ app.layout = html.Div([
     ],
         style = {'display': 'inline-block', 'verticalAlign': 'top', 'width': '30%', 'marginLeft': '30px'}
     ),
-    html.Div(children=[dcc.Graph(id='overall-graph')], style={'marginLeft': '20px'}, id='graphsDiv')
+    html.Div(children=[dcc.Graph(id='overall-graph')], style={'marginLeft': '20px'}, id='graphsDiv'),
+
+    html.Br(),
+    
+    html.Div(children=[html.Div(dcc.Graph(id='grouping-graph'), style={'marginLeft': '20px', 'width': '50%', 'float': 'left'}),
+                       html.Div(dash_table.DataTable(id='teamTable',
+                            data=[],
+                            columns=[
+                                    {'name': 'Team', 'id': 'Team'},
+                                    {'name': 'Estimate', 'id': 'Estimate'},
+                                    {'name': 'Utilization', 'id': 'Utilization'}
+                                    ],
+                            style_cell={'textAlign': 'left', 'textOverflow': 'ellipsis', 'minWidth': '20px', 'maxWidth': '400px'},
+                            style_table={'overflowX': 'auto', 'overflowY': 'auto'},
+                            page_size=10,
+                            style_header={'fontWeight': 'bold', 'backgroundColor': '#c799b9', 'fontFamily': 'Calibri', 'fontStyle': 'italic'},
+                            style_data={'fontFamily': 'Calibri'},
+                            style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'}]
+                        ), style={'marginRight': '20px', 'width': '50%', 'float': 'left', 'marginTop': '120px'})
+                    ], style={'display': 'flex'}),
+    html.Br()
 
 ])
 
@@ -321,6 +342,9 @@ def selectName (names, graph):
     Output('loading', 'children'),
     Output('overall-graph', 'figure'),
     Output('names', 'options'),
+    Output('grouping-graph', 'figure'),
+    Output('teamTable', 'data'),
+    Output('ticketCount', 'children'),
     Input('daysSlider', 'value')
 ])
 def jiraConnector(days):
@@ -343,8 +367,6 @@ def jiraConnector(days):
     defaultDf = pd.read_excel('Members.xlsx')
     defaultDf['Assignee'] = defaultDf['Assignee'].str.replace('Muhammad ', '')
     defaultDf['Assignee'] = defaultDf['Assignee'].str.title()
-    #defaultDf['End Date'] = date.today()
-    #defaultDf['Start Date'] = date.today() - timedelta(days=days)
 
     while True:
         start = initial * size
@@ -444,7 +466,7 @@ def jiraConnector(days):
     database = 'Cost' 
     conn = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER="+server+';DATABASE='+database+';Trusted_Connection=yes;')
     cursor = conn.cursor()
-    #cursor.execute("TRUNCATE TABLE DeliveryTeamReport")
+    cursor.execute("TRUNCATE TABLE DeliveryTeamReportV2")
     for index, row in defaultDf.iterrows():
         cursor.execute("INSERT INTO DeliveryTeamReportV2 (Team, Name, Allocation, Utilization, StartDate, EndDate) values(?,?,?,?,?,?);", 
                        str(row.Team), str(row.Assignee), float(row['Estimate']), float(row['Utilization']), row['Start Date'], row['End Date'])
@@ -472,6 +494,22 @@ def jiraConnector(days):
                 hovermode='closest'
             )
         }
+    groupDf = defaultDf.groupby(['Team']).sum()
+    team = groupDf.index.tolist()
+    utilize = groupDf.Utilization.tolist()
+    trace3 = go.Pie(labels=team,
+                    values=utilize
+            )
+    pie_figure = {
+            'data': [trace3],
+            'layout': go.Layout(
+                title = 'Team Segregation',
+                hovermode='closest'
+            )
+        }
+    groupDf['Utilization'] = groupDf['Utilization'].round(2)
+    groupDf['Estimate'] = groupDf['Estimate'].round(2)
+    groupDf.reset_index(inplace=True)
 
     for name in workLogAlpha.Assignee:
         nameDict = {}
@@ -479,7 +517,7 @@ def jiraConnector(days):
         nameDict['value'] = name
         option.append(nameDict)
 
-    return [workLog.to_dict('records'), html.Div(style={'display': 'None'}), figure, option]
+    return [workLog.to_dict('records'), html.Div(style={'display': 'None'}), figure, option, pie_figure, groupDf.to_dict('rows'), '{} tickets retrieved'.format(len(workLog))]
 
 
 if __name__ == '__main__':
