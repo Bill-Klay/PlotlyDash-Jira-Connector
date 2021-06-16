@@ -65,7 +65,7 @@ A **teamwise segregation** is also availabe at the end for which there first nee
 This project uses Python, more specifically it uses the Plotly/Dash Framework for making web apps using integrated plotly graphs.
 * [Plotly Dash](https://plotly.com/dash/)
 * [Python](https://www.python.org/)
-
+* [Visual Studio 2019](https://visualstudio.microsoft.com/vs/)
 <!-- GETTING STARTED -->
 ## Getting Started :construction_worker:
 
