@@ -1,8 +1,8 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/Logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/Bill-Klay/PlotlyDash-Jira-Connector">
+    <img src="./Images/Logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Best-README-Template</h3>
@@ -49,7 +49,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project :book:
 
-[![Screenshot2][Screenshot2]](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot2.png)
+![Screenshot2](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot2.png)
 
 This project was made as an inhouse improvement for making a publicly viewed dashboard that shows team engagements and what is being curated inside the production environment. 
 It uses **Python** as the base environment making use of the *plotly dash framework* for hosting plotly enabled dashboards. 
