@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/Logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Best-README-Template</h3>
@@ -17,8 +17,6 @@
     <a href="https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/issues">Request Feature</a>
   </p>
 </p>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
@@ -49,75 +47,73 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About The Project :book:
 
-[![Screenshot2][Screenshot2]](https://example.com)
+[![Screenshot2][Screenshot2]](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot2.png)
 
-There are many great README templates available on GitHub, however, I didn't find one that really suit my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+This project was made as an inhouse improvement for making a publicly viewed dashboard that shows team engagements and what is being curated inside the production environment. 
+It uses **Python** as the base environment making use of the *plotly dash framework* for hosting plotly enabled dashboards. 
+The dashboard provides users with acces to donwloading all the tickets or specified tickets from **Jira Cloud** based on the entered JQL. 
+The dashboards presents with an interactive data table for viewing the results from the **JQL**, plus a summary of the **Estimates and Utilization** of the work logged. 
+An overall graphs shows all the users with there estimates and utilization in a **bar graph** with more graphs and individual person view available from the drop down. 
+A **teamwise segregation** is also availabe at the end for which there first needs to be an excel present with all the team members name and there department. 
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should element DRY principles to the rest of your life :smile:
-
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have have contributed to expanding this template!
-
-A list of commonly used resources that I find helpful are listed in the acknowledgements.
-
-### Built With
+### Built With :computer:
 
 This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-* [Bootstrap](https://getbootstrap.com)
-* [JQuery](https://jquery.com)
-* [Laravel](https://laravel.com)
-
-
+* [Plotly Dash](https://plotly.com/dash/)
+* [Python](https://www.python.org/)
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+The ReadMe documents provides users with a basic introduction to setting up the requirements and get the project running and how improvements be added. 
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+Things you need to know and have before executing the project on you local environment.
+* Python (This project was made and tested on **Python 3.9**, theoratically this should work on anything greater than Python 2.*).
+* Have a basic understanding of Python's Plotly Dash framework.
+* Python Jira library
+* Python Pandas library
+* Basic level HTML and CSS
+* A Jira cloud account with an API token
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Install and setup [Python](https://www.python.org/) environment 
+2. Setup your Python code with a connection to your organizations Jira cloud. Log in to your Jira account and get a free API Key/token at [Atlassian Support](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
+3. Install all the dependencies from the reqiurements file provided
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+   pip install -r requirements.txt
    ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```JS
-   const API_KEY = 'ENTER YOUR API';
-   ```
-
-
 
 <!-- USAGE EXAMPLES -->
-## Usage
+## Usage ![build](https://img.shields.io/badge/Build-Tested-green)
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+The source code is available for adusting to your own need, besides that to use as is remeber to enter you own Atlassian email id and the API key obtained from the Jira cloud account. 
+*Replace the holders with your own email and token*. 
+After that the *JQL* needs to be customized to obtained results relevant to one's need. 
+The code itself will analyse the results and prepare the results from the data retrieved. 
+To get a teamwise segregated result an excel needs to be prepared (default name used in the project is *Members.xlsx*) and kept along with the *app.py* file which holds the value in the following format:
+* Team
+* Assignee
+* Estiamte
+* Utilization
+* Start Date
+* End Date
 
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-
+Where *Team* is the department of the team member, *Assignee* holds all the names, *Estimate* has the default allocation time (initially to be filled with 0), *Utilization* has the calculated time spent (initially to be filled with 0), and *Start and End Date* are placeholders for the dataframe to be loaded correctly these can be left or regardless of the initial value these will be ovreridden. 
+Adjust the sliding date range to your need and the JQL entered will retrieve tickets back to that number of days (default is 2 weeks). 
+All the tickets retrieved will be displayed in a ![data table](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot1.png). 
+A ![dashboard](.\images\Screenshot4.png) underneath the data table will show the data retrived in a bar graph by default, but can be customized from the drop down available and team members names can be individually chosen from another drop down. 
+*Initially the dashboard supports Line graph, bar graph, bubble graph and heatmap*. 
+If the *Members.xlsx* excel file is created then the distributed ![pie chart](.\images\Screenshot3.png) will be dispalyed. 
 
 <!-- ROADMAP -->
 ## Roadmap
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a list of proposed features (and known issues).
+See the [open issues](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/issues) for a list of proposed features (and known issues).
 
 
 
@@ -132,39 +128,27 @@ Contributions are what make the open source community such an amazing place to b
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-
+Thanks for visiting :green_heart:
 
 <!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-
-
 <!-- CONTACT -->
-## Contact
+## Contact - Bilal Khan :email:
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-
+* [email](mailto:bilal.khan2998@gmail.com) 
+* [LinkedIn](https://www.linkedin.com/in/bilalkhan29/)
+* [Project Link](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 * [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
 * [Img Shields](https://shields.io)
 * [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Pages](https://pages.github.com)
-* [Animate.css](https://daneden.github.io/animate.css)
-* [Loaders.css](https://connoratherton.com/loaders)
-* [Slick Carousel](https://kenwheeler.github.io/slick)
-* [Smooth Scroll](https://github.com/cferdinandi/smooth-scroll)
-* [Sticky Kit](http://leafo.net/sticky-kit)
-* [JVectorMap](http://jvectormap.com)
-* [Font Awesome](https://fontawesome.com)
-
-
+* [Plotly Dash](https://plotly.com/dash/)
+* [Python](https://www.python.org/)
 
 
 
