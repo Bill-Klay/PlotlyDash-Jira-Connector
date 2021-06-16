@@ -358,7 +358,7 @@ def jiraConnector(days):
     initial = 0
     size = 100
 
-    jira = JIRA(options={'server': 'https://qordatainc.atlassian.net/'}, basic_auth=('bilal.khan@qordata.com', 'yaeSBwTTcPI3CdpPUG2G2D28'))
+    jira = JIRA(options={'server': '<jira cloud url>'}, basic_auth=('<email id>', '<API key>'))
     jql='worklogDate >= -'+str(days)+'d'
 
     data_jira = []
