@@ -17,7 +17,7 @@
     <a href="https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/issues">Request Feature</a>
   </p>
 </p>
-
+---
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary>Table of Contents</summary>
