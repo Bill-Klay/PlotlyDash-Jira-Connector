@@ -395,13 +395,13 @@ def jiraConnector(days):
     initial = 0
     size = 100
 
-    jira = JIRA(options={'server': '<jira cloud url>'}, basic_auth=('<email id>', '<API key>')) #Connecting to Jira cloud
+    jira = JIRA(options={'server': '<Server Name>'}, basic_auth=('<Atlassian Email ID>', '<Jira Cloud Token>')) #Connecting to Jira cloud
     jql='worklogDate >= -'+str(days)+'d' #The JQL on which the whole data is retrieved
 
     data_jira = []
     work_log = []
     option.clear()
-    defaultDf = pd.read_excel('Members.xlsx')
+    defaultDf = pd.read_excel('Members.xlsx') #Reading the members file here
     defaultDf['Assignee'] = defaultDf['Assignee'].str.replace('Muhammad ', '')
     defaultDf['Assignee'] = defaultDf['Assignee'].str.title()
 
