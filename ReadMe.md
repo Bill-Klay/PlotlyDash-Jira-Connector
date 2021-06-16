@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/Bill-Klay/PlotlyDash-Jira-Connector">
-    <img src="./images/Logo.png" alt="Logo" width="80" height="80">
+    <img src="./images/Logo.png" alt="Logo" width="247" height="92">
   </a>
 
   <h3 align="center">Best-README-Template</h3>
@@ -60,16 +60,16 @@ A **teamwise segregation** is also availabe at the end for which there first nee
 
 ### Built With :computer:
 
-This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+This project uses Python, more specifically it uses the Plotly/Dash Framework for making web apps using integrated plotly graphs.
 * [Plotly Dash](https://plotly.com/dash/)
 * [Python](https://www.python.org/)
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-The ReadMe documents provides users with a basic introduction to setting up the requirements and get the project running and how improvements be added. 
+The *ReadMe* documents provides users with a basic introduction to setting up the requirements and get the project running and how improvements can be added. 
 
-### Prerequisites
+### Prerequisites :construction_worker:
 
 Things you need to know and have before executing the project on you local environment.
 * Python (This project was made and tested on **Python 3.9**, theoratically this should work on anything greater than Python 2.*).
@@ -89,7 +89,7 @@ Things you need to know and have before executing the project on you local envir
    ```
 
 <!-- USAGE EXAMPLES -->
-## Usage ![build](https://img.shields.io/badge/Build-Tested-green)
+## Usage ![build](https://img.shields.io/badge/Build-Tested-green) ![build mode](https://img.shields.io/badge/Build-Debug%20Mode-orange)
 
 The source code is available for adusting to your own need, besides that to use as is remeber to enter you own Atlassian email id and the API key obtained from the Jira cloud account. 
 *Replace the holders with your own email and token*. 
@@ -105,10 +105,10 @@ To get a teamwise segregated result an excel needs to be prepared (default name 
 
 Where *Team* is the department of the team member, *Assignee* holds all the names, *Estimate* has the default allocation time (initially to be filled with 0), *Utilization* has the calculated time spent (initially to be filled with 0), and *Start and End Date* are placeholders for the dataframe to be loaded correctly these can be left or regardless of the initial value these will be ovreridden. 
 Adjust the sliding date range to your need and the JQL entered will retrieve tickets back to that number of days (default is 2 weeks). 
-All the tickets retrieved will be displayed in a ![data table](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot1.png). 
-A ![dashboard](.\images\Screenshot4.png) underneath the data table will show the data retrived in a bar graph by default, but can be customized from the drop down available and team members names can be individually chosen from another drop down. 
+All the tickets retrieved will be displayed in a **data table** ![data table](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot1.png). 
+A **graph** ![dashboard](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot4.png) underneath the data table will show the data retrived in a bar graph by default, but can be customized from the drop down available and team members names can be individually chosen from another drop down. 
 *Initially the dashboard supports Line graph, bar graph, bubble graph and heatmap*. 
-If the *Members.xlsx* excel file is created then the distributed ![pie chart](.\images\Screenshot3.png) will be dispalyed. 
+If the `Members.xlsx` excel file is created then the distributed **pie chart** ![pie chart](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot3.png) will be dispalyed. 
 
 <!-- ROADMAP -->
 ## Roadmap
