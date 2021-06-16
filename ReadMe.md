@@ -5,7 +5,7 @@
     <img src="./images/Logo.png" alt="Logo" width="247" height="92">
   </a>
 
-  <h3 align="center">Best-README-Template</h3>
+  <h3 align="center">Jira Connector</h3>
 
   <p align="center">
     Review your teams Jira work log with a python dashboard
@@ -65,13 +65,13 @@ This project uses Python, more specifically it uses the Plotly/Dash Framework fo
 * [Python](https://www.python.org/)
 
 <!-- GETTING STARTED -->
-## Getting Started
+## Getting Started :construction_worker:
 
 The *ReadMe* documents provides users with a basic introduction to setting up the requirements and get the project running and how improvements can be added. 
 
-### Prerequisites :construction_worker:
+### Prerequisites
 
-Things you need to know and have before executing the project on you local environment.
+Things you need to know and have before executing the project on your local environment.
 * Python (This project was made and tested on **Python 3.9**, theoratically this should work on anything greater than Python 2.*).
 * Have a basic understanding of Python's Plotly Dash framework.
 * Python Jira library
@@ -105,10 +105,13 @@ To get a teamwise segregated result an excel needs to be prepared (default name 
 
 Where *Team* is the department of the team member, *Assignee* holds all the names, *Estimate* has the default allocation time (initially to be filled with 0), *Utilization* has the calculated time spent (initially to be filled with 0), and *Start and End Date* are placeholders for the dataframe to be loaded correctly these can be left or regardless of the initial value these will be ovreridden. 
 Adjust the sliding date range to your need and the JQL entered will retrieve tickets back to that number of days (default is 2 weeks). 
-All the tickets retrieved will be displayed in a **data table** ![data table](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot1.png). 
-A **graph** ![dashboard](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot4.png) underneath the data table will show the data retrived in a bar graph by default, but can be customized from the drop down available and team members names can be individually chosen from another drop down. 
+All the tickets retrieved will be displayed in a **data table**. \
+![data table](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot1.png) \
+A **graph** ![dashboard](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot4.png) underneath the data table will show the data retrived in a bar graph by default, but can be customized from the drop down available and team members names can be individually chosen from another drop down. \
 *Initially the dashboard supports Line graph, bar graph, bubble graph and heatmap*. 
-If the `Members.xlsx` excel file is created then the distributed **pie chart** ![pie chart](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot3.png) will be dispalyed. 
+If the `Members.xlsx` excel file is created then the distributed **pie chart** \
+![pie chart](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot3.png) \
+will be dispalyed. 
 
 <!-- ROADMAP -->
 ## Roadmap
@@ -143,27 +146,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 * [Project Link](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector)
 
 <!-- ACKNOWLEDGEMENTS -->
-## Acknowledgements
+## Acknowledgements :octocat:
 * [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
 * [Img Shields](https://shields.io)
 * [Choose an Open Source License](https://choosealicense.com)
 * [Plotly Dash](https://plotly.com/dash/)
 * [Python](https://www.python.org/)
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
