@@ -18,12 +18,14 @@ warnings.filterwarnings('ignore')
 
 app = dash.Dash(__name__)
 
+#Global variables for passing into multiple callbacks
 jiraData = pd.DataFrame()
 workLog = pd.DataFrame()
 workLogAlpha = pd.DataFrame()
 dayCount = 0
 option = []
 
+#The default app/dashboard layout (Screenshot can be observed on readme)
 app.layout = html.Div([
     
     html.Div([html.Span('Jira Connector', className='circle-sketch-highlight', style={'font-size': '2.5em', 'font-family':'Script MT', 'marginLeft':'20px'}),
@@ -137,6 +139,7 @@ app.layout = html.Div([
 
 ])
 
+#Adjust the past days slider
 @app.callback([
     Output('days', 'children'),
     Input('daysSlider', 'value')
@@ -144,6 +147,7 @@ app.layout = html.Div([
 def sliderUpdate(days):
     return ['{} Days'.format(days)]
 
+#Download all the JQL data retrieved
 @app.callback([
     Output('downloadRawFile', 'data'),
     Input('rawFile', 'n_clicks')
@@ -154,6 +158,7 @@ def fileDownload(click):
     else:
         return [dcc.send_data_frame(jiraData.to_excel, "Jira Data.xlsx")]
 
+#Download work log file
 @app.callback([
     Output('downloadLogFile', 'data'),
     Input('logFile', 'n_clicks')
@@ -164,6 +169,7 @@ def fileDownload(click):
     else:
         return [dcc.send_data_frame(workLog.to_excel, "Work Log.xlsx")]
 
+#Download Summary file
 @app.callback([
     Output('downloadSummaryFile', 'data'),
     Input('summaryFile', 'n_clicks')
@@ -174,6 +180,13 @@ def fileDownload(click):
     else:
         return [dcc.send_file(".\Summary.xlsx")]
 
+#This callback works for the switch table button, there two views to the main data table
+#Shows all tickets retrieved and summary of estimation and utilization
+#Returns:
+    #The new data table with respect to the click
+    #Disables the previous Div to hide the old data table
+#Input:
+    #Click on the switch data table button
 @app.callback([
     Output('workLogAlpha-dataTable', 'children'),
     Output('workLog-dataTable', 'children'),
@@ -211,6 +224,13 @@ def changeTable(click):
             )]), html.Div(style={'display': 'None'})
         ]
 
+#This callback deals with the changes on the main overall graph
+#It also deals with selecting specific names and graphs for viewing
+#Returs:
+    #Changes in the overall grahp Div wrt the names and graph selected
+#Inputs:
+    #Names from the drop down list
+    #Graph for viewing
 @app.callback(Output('graphsDiv', 'children'),
               Input('names', 'value'),
               Input('graphs', 'value'),
@@ -222,6 +242,7 @@ def selectName (names, graph):
     mode = 'lines+markers'
     marker = {'size': 12, 'symbol': 'circle-dot', 'color': 'darkviolet'}
 
+    #If nothing is selected then return the default overall bar graph
     trace1 = go.Bar(
                     x = workLogAlpha['Assignee'],
                     y = workLogAlpha['Estimate'],
@@ -236,6 +257,7 @@ def selectName (names, graph):
     )
     data = [trace1, trace2]
     
+    #If bubble graph is selected
     if graph == 'Bubble':
         mode = 'markers'
         marker = dict(size=3*workLogAlpha['Time spent'])
@@ -247,6 +269,7 @@ def selectName (names, graph):
                 marker = marker
             )
         ]
+    #Bar graph
     elif graph == 'Bar':
         data = [
             go.Bar(
@@ -255,6 +278,7 @@ def selectName (names, graph):
                 marker = {'color': 'darkviolet'}
             )
         ]
+    #Heatmap
     elif graph == 'Heatmap':
         data = [
             go.Heatmap(
@@ -265,6 +289,7 @@ def selectName (names, graph):
             zmin = 5, zmax = 40 # add max/min color values to make each plot consistent
             )
         ] 
+    #Line graph
     elif graph == 'Line':
         data = [
             go.Scatter(
@@ -284,6 +309,7 @@ def selectName (names, graph):
             )
         }
 
+    #In addition to selecting a specific graph from the list if there is specific name selected then display data relative to only that list
     if names is not None:
         if len(names):
             # traces = []
@@ -337,6 +363,17 @@ def selectName (names, graph):
     else:
         return [dcc.Graph(id='overall-graph', figure=figure)]
 
+#Main app callback that returns the default format after dataframe calculation
+#Returns:
+    #The main dash data table
+    #The days count visible at the range selector
+    #Main overall bar graph
+    #Names list drop down options
+    #Grouped team graph
+    #Grouped team data table
+    #Number of tickets retrieved
+#Input:
+    #Number of past days to retrieve tickets from (1-30)
 @app.callback([
     Output('dashboard', 'data'),
     Output('loading', 'children'),
@@ -358,8 +395,8 @@ def jiraConnector(days):
     initial = 0
     size = 100
 
-    jira = JIRA(options={'server': '<jira cloud url>'}, basic_auth=('<email id>', '<API key>'))
-    jql='worklogDate >= -'+str(days)+'d'
+    jira = JIRA(options={'server': '<jira cloud url>'}, basic_auth=('<email id>', '<API key>')) #Connecting to Jira cloud
+    jql='worklogDate >= -'+str(days)+'d' #The JQL on which the whole data is retrieved
 
     data_jira = []
     work_log = []
@@ -368,28 +405,33 @@ def jiraConnector(days):
     defaultDf['Assignee'] = defaultDf['Assignee'].str.replace('Muhammad ', '')
     defaultDf['Assignee'] = defaultDf['Assignee'].str.title()
 
+    #Retrieving tickets from jira cloud and appending to a list
+    #Since the maximum count of ticket retrieved at a time in 100 we loop to get all the tickets or specific start and end count
     while True:
-        start = initial * size
+        start = initial * size #Initial start of ticket count
+        #Fields to get
         jira_search = jira.search_issues(jql, startAt=start, maxResults=size, 
                                          fields = "key, summary, issuetype, assignee, reporter, status, created, resolutiondate, workratio, timespent, timeoriginalestimate")
         if(len(jira_search) == 0): 
             break
 
+        #Geting all the specificed fields of the tickets in a list
         for issue in jira_search:
             issue_key = issue.key
 
-            issue_summary = issue.fields.summary
+            issue_summary = issue.fields.summary #Summary
 
-            request_type = str(issue.fields.issuetype)
+            request_type = str(issue.fields.issuetype) #Issue type
 
             datetime_creation = issue.fields.created
             if datetime_creation is not None:
-                datetime_creation = datetime.strptime(datetime_creation[:19], "%Y-%m-%dT%H:%M:%S")
+                datetime_creation = datetime.strptime(datetime_creation[:19], "%Y-%m-%dT%H:%M:%S") #Creation datetime
 
             datetime_resolution = issue.fields.resolutiondate
             if datetime_resolution is not None:
-                datetime_resolution = datetime.strptime(datetime_resolution[:19], "%Y-%m-%dT%H:%M:%S")
+                datetime_resolution = datetime.strptime(datetime_resolution[:19], "%Y-%m-%dT%H:%M:%S") #End datetime
 
+            #Reporter specification
             reporter_login = None
             reporter_name = None
             reporter = issue.raw['fields'].get('reporter', None)
@@ -409,6 +451,7 @@ def jiraConnector(days):
             if st is not None:
                 status = st.name
 
+            #Work ratio and time logged
             issue_workratio = issue.fields.workratio
             issue_timespent = issue.fields.timespent
             issue_estimate = issue.fields.timeoriginalestimate
@@ -416,15 +459,17 @@ def jiraConnector(days):
             data_jira.append((issue_key, issue_summary, request_type, datetime_creation, datetime_resolution, reporter_login, reporter_name, assignee_login, assignee_name, status, issue_workratio, issue_timespent, issue_estimate))
             work_log.append((issue_key, issue_summary, assignee_name, issue_estimate, issue_timespent))
 
-        initial = initial + 1
+        initial = initial + 1 #Get the next 100 count
 
+    #List to dataframe
     jiraData = pd.DataFrame(data_jira, columns=['Issue key', 'Summary', 'Request type', 'Datetime creation', 'Datetime resolution', 'Reporter login', 'Reporter name', 'Assignee login', 'Assignee name', 'Status', 'Work raito', 'Time spent', 'Estimate'])
     workLog = pd.DataFrame(work_log, columns=['Issue key', 'Summary', 'Assignee', 'Estimate', 'Time spent'])
     
     jiraData.to_excel('Raw Data.xlsx', header=True, index=True)
     workLog.to_excel('Work Log.xlsx', header=True, index=True)
     jira.close()
-
+    
+    #Preparing a dataframe (workLogAlpha) for downloading the summary report that shows the estimates and utilization of users in percentage
     workLogAlpha = workLog.groupby(['Assignee']).sum()
     workLogAlpha[['Time spent', 'Estimate']] = workLogAlpha[['Time spent', 'Estimate']].div(3600) 
     workLogAlpha['Utilization'] = workLogAlpha['Time spent'].div(80).round(4)
@@ -435,6 +480,7 @@ def jiraConnector(days):
     workLogAlpha.to_excel(writer, index=False, sheet_name='Report')
     workbook = writer.book
     worksheet = writer.sheets['Report']
+    #Excel engine for writing the dataframe in the requierd format
     number_rows = len(workLogAlpha)
     percent_fmt = workbook.add_format({'num_format': '0.00%', 'bold': True})
     color_range = "D2:D{}".format(number_rows+1)
@@ -447,13 +493,14 @@ def jiraConnector(days):
     worksheet.set_column(color_range, number_rows+1, percent_fmt)
     writer.save()
     
+    #Cleaning for better dashboard visualization after saving the datafarme in file format
     workLogAlpha['Utilization'] = workLogAlpha['Utilization'].mul(100).round(2)
-    #workLogAlpha['Utilization'] = workLogAlpha['Utilization'].astype(str) + '%'
+    #workLogAlpha['Utilization'] = workLogAlpha['Utilization'].astype(str) + '%' #To have or not to have a percentage sign at the end
     workLogAlpha['Estimate'] = workLogAlpha['Estimate'].mul(100).round(2)
     #workLogAlpha['Estimate'] = workLogAlpha['Estimate'].astype(str) + '%'
     workLogAlpha['Time spent'] = workLogAlpha['Time spent'].round(2)
     workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.title()
-    workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.replace('Muhammad ', '')
+    workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.replace('Muhammad ', '') #Just removed too many similar Sir names :)
     defaultDf = workLogAlpha.set_index('Assignee').combine_first(defaultDf.drop_duplicates().set_index('Assignee')).reset_index()
     defaultDf.drop(['Time spent'], axis=1, inplace=True)
     defaultDf['End Date'] = date.today()
@@ -462,6 +509,19 @@ def jiraConnector(days):
     workLog['Assignee'] = workLog['Assignee'].str.replace('.', ' ')
     workLog['Assignee'] = workLog['Assignee'].str.title()
 
+    #Database schema
+    #CREATE TABLE [dbo].[DeliveryTeamReportV2](
+	   # [ID] [int] IDENTITY(1,1) NOT NULL,
+	   # [Team] [varchar](10) NOT NULL,
+	   # [Name] [varchar](50) NOT NULL,
+	   # [Allocation] [float] NOT NULL,
+	   # [Utilization] [float] NOT NULL,
+	   # [StartDate] [date] NULL,
+	   # [EndDate] [date] NULL,
+    #    CONSTRAINT [PK_Cost_EmployeeIDV2] PRIMARY KEY CLUSTERED
+    #)
+
+    #Database entry for PowerBI dashboards
     server = 'PROD-LPT-69' 
     database = 'Cost' 
     conn = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER="+server+';DATABASE='+database+';Trusted_Connection=yes;')
@@ -473,6 +533,9 @@ def jiraConnector(days):
     conn.commit()
     cursor.close()
 
+    #Preparing multiple traces for default graphs
+
+    #Main overall bar graph
     trace1 = go.Bar(
                     x = workLogAlpha['Assignee'],
                     y = workLogAlpha['Estimate'],
@@ -494,6 +557,8 @@ def jiraConnector(days):
                 hovermode='closest'
             )
         }
+
+    #Teamwise segregated pie chart
     groupDf = defaultDf.groupby(['Team']).sum()
     team = groupDf.index.tolist()
     utilize = groupDf.Utilization.tolist()
@@ -511,12 +576,14 @@ def jiraConnector(days):
     groupDf['Estimate'] = groupDf['Estimate'].round(2)
     groupDf.reset_index(inplace=True)
 
+    #Preparing options (list of usernames in the drop down)
     for name in workLogAlpha.Assignee:
         nameDict = {}
         nameDict['label'] = name
         nameDict['value'] = name
         option.append(nameDict)
-
+    
+    #Returning everything prepared so far to the dashboard
     return [workLog.to_dict('records'), html.Div(style={'display': 'None'}), figure, option, pie_figure, groupDf.to_dict('rows'), '{} tickets retrieved'.format(len(workLog))]
 
 
