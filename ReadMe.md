@@ -49,10 +49,10 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project :book:
 
-![Screenshot2](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/Imgaes/Screenshot2.png)
+![Screenshot2](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot2.png)
 
 This project was made as an inhouse improvement for making a publicly viewed dashboard that shows team engagements and what is being curated inside the production environment. 
-It uses **Python** as the base environment making use of the *plotly dash framework* for hosting plotly enabled dashboards. 
+It uses **Python** as the base environment making use of the **plotly dash framework** for hosting plotly enabled dashboards. 
 The dashboard provides users with acces to donwloading all the tickets or specified tickets from **Jira Cloud** based on the entered JQL. 
 The dashboards presents with an interactive data table for viewing the results from the **JQL**, plus a summary of the **Estimates and Utilization** of the work logged. 
 An overall graphs shows all the users with there estimates and utilization in a **bar graph** with more graphs and individual person view available from the drop down. 
@@ -98,7 +98,7 @@ The code itself will analyse the results and prepare the results from the data r
 To get a teamwise segregated result an excel needs to be prepared (default name used in the project is *Members.xlsx*) and kept along with the *app.py* file which holds the value in the following format:
 * Team
 * Assignee
-* Estiamte
+* Estimate
 * Utilization
 * Start Date
 * End Date
@@ -107,7 +107,7 @@ Where *Team* is the department of the team member, *Assignee* holds all the name
 Adjust the sliding date range to your need and the JQL entered will retrieve tickets back to that number of days (default is 2 weeks). 
 All the tickets retrieved will be displayed in a **data table**. \
 ![data table](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot1.png) \
-A **graph** ![dashboard](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot4.png) underneath the data table will show the data retrived in a bar graph by default, but can be customized from the drop down available and team members names can be individually chosen from another drop down. \
+A **graph** ![dashboard](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot4.png) underneath the data table will show the data retrived in a bar graph by default, but can be customized from the drop down available and team members names can be individually chosen from another drop down. 
 *Initially the dashboard supports Line graph, bar graph, bubble graph and heatmap*. 
 If the `Members.xlsx` excel file is created then the distributed **pie chart** \
 ![pie chart](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot3.png) \
