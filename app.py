@@ -395,14 +395,17 @@ def jiraConnector(days):
     initial = 0
     size = 100
 
-    jira = JIRA(options={'server': '<Server Name>'}, basic_auth=('<Atlassian Email ID>', '<Jira Cloud Token>')) #Connecting to Jira cloud
+    endDate = date.today()
+    startDate = endDate - timedelta(days=int(days))
+
+    jira = JIRA(options={'server': '<server name>'}, basic_auth=('<Jira cloud email id>', '<API token>')) #Connecting to Jira cloud
     jql='worklogDate >= -'+str(days)+'d' #The JQL on which the whole data is retrieved
 
     data_jira = []
     work_log = []
     option.clear()
     defaultDf = pd.read_excel('Members.xlsx') #Reading the members file here
-    defaultDf['Assignee'] = defaultDf['Assignee'].str.replace('Muhammad ', '')
+    defaultDf['Assignee'] = defaultDf['Assignee'].str.replace('Muhammad ', '') #Just replacing too many similar sir names :)
     defaultDf['Assignee'] = defaultDf['Assignee'].str.title()
 
     #Retrieving tickets from jira cloud and appending to a list
@@ -417,6 +420,15 @@ def jiraConnector(days):
 
         #Geting all the specificed fields of the tickets in a list
         for issue in jira_search:
+            timeSpent = 0
+            
+            #Retrieving the worklog only in the current range
+            for w in jira.worklogs(issue.key):
+                started = datetime.strptime(w.started[:-5], '%Y-%m-%dT%H:%M:%S.%f')
+                if not (startDate <= started.date() <= endDate):
+                    continue
+                timeSpent = timeSpent + w.timeSpentSeconds
+
             issue_key = issue.key
 
             issue_summary = issue.fields.summary #Summary
@@ -453,7 +465,7 @@ def jiraConnector(days):
 
             #Work ratio and time logged
             issue_workratio = issue.fields.workratio
-            issue_timespent = issue.fields.timespent
+            issue_timespent = timeSpent
             issue_estimate = issue.fields.timeoriginalestimate
 
             data_jira.append((issue_key, issue_summary, request_type, datetime_creation, datetime_resolution, reporter_login, reporter_name, assignee_login, assignee_name, status, issue_workratio, issue_timespent, issue_estimate))
