@@ -113,7 +113,10 @@ A **graph** ![dashboard](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/
 *Initially the dashboard supports Line graph, bar graph, bubble graph and heatmap*. 
 If the `Members.xlsx` excel file is created then the distributed **pie chart** \
 ![pie chart](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Screenshot3.png) \
-will be dispalyed. 
+will be dispalyed.
+*Work log adjustment* made the program a lot slower than intended. Ususally 624 tickets were retrieved and processed in under 10 sec with a complexity of O(n), 
+but since the retrieving a work log brings in the whole time logged rather than just the work that was logged in the data range provided *jira.worklog* was used to get the worklog list and traverse manually. 
+This increased the complexity to O(n*m) taking around 264 sec upto 4-5 mins to retrive and process the average of 620 tickets.
 
 <!-- ROADMAP -->
 ## Roadmap
