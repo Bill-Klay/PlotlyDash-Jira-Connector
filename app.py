@@ -465,7 +465,7 @@ def jiraConnector(days):
     startDate = datetime.strptime(startDate, '%Y-%m-%d')
     endDate = datetime.strptime(endDate, '%Y-%m-%d')
 
-    jira = JIRA(options={'server': 'https://qordatainc.atlassian.net/'}, basic_auth=('bilal.khan@qordata.com', 'yaeSBwTTcPI3CdpPUG2G2D28')) #Connecting to Jira cloud
+    jira = JIRA(options={'server': '<server>'}, basic_auth=('<username>', '<token>')) #Connecting to Jira cloud
     #jql='worklogDate >= -'+str(days)+'d' #The JQL on which the whole data is retrieved
 
     data_jira = []
