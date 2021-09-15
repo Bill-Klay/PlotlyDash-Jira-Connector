@@ -8,7 +8,3 @@ jsonschema==3.2.0
 jira==2.0.0
 pandas==1.1.5
 plotly==4.13.0
-fuzzywuzzy==0.18.0
-numpy==1.19.5
-python-dateutil==2.8.1
-pywin32==301
