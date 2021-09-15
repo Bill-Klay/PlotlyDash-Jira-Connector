@@ -93,7 +93,7 @@ Things you need to know and have before executing the project on your local envi
 <!-- USAGE EXAMPLES -->
 ## Usage ![build](https://img.shields.io/badge/Build-Tested-green) ![build mode](https://img.shields.io/badge/Build-Debug%20Mode-orange)
 
-The source code is available for adusting to your own need, besides that to use as is remeber to enter you own Atlassian email id and the API key obtained from the Jira cloud account. 
+The source code is available for adusting to your own need, besides that to use as is remeber to enter your own Atlassian email id and the API key obtained from the Jira cloud account. 
 *Replace the holders with your own email and token*. 
 After that the *JQL* needs to be customized to obtained results relevant to one's need. 
 The code itself will analyse the results and prepare the results from the data retrieved. 
@@ -116,7 +116,9 @@ If the `Members.xlsx` excel file is created then the distributed **pie chart** \
 will be dispalyed.
 *Work log adjustment* made the program a lot slower than intended. Ususally 624 tickets were retrieved and processed in under 10 sec with a complexity of O(n), 
 but since the retrieving a work log brings in the whole time logged rather than just the work that was logged in the data range provided *jira.worklog* was used to get the worklog list and traverse manually. 
-This increased the complexity to O(n*m) taking around 264 sec upto 4-5 mins to retrive and process the average of 620 tickets.
+This increased the complexity to O(n*m) taking around 264 sec upto 4-5 mins to retrive and process the average of 620 tickets.\
+![flow diagram](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Flow_Diagram.png) \
+The flow of the application can be observed in the flow chart described above. 
 
 <!-- ROADMAP -->
 ## Roadmap
@@ -157,3 +159,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 * [Choose an Open Source License](https://choosealicense.com)
 * [Plotly Dash](https://plotly.com/dash/)
 * [Python](https://www.python.org/)
+* [Jira timesheet PDF](https://github.com/jordanjambazov/jira-timesheet-pdf)
