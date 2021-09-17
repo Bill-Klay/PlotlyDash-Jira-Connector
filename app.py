@@ -26,9 +26,10 @@ app = dash.Dash(__name__)
 jiraData = pd.DataFrame()
 workLog = pd.DataFrame()
 workLogAlpha = pd.DataFrame()
-dayCount = 0
 option = []
 filename = ""
+startDate = date.today()
+endDate = date.today()
 
 #The default app/dashboard layout (Screenshot can be observed on readme)
 app.layout = html.Div([
@@ -40,30 +41,43 @@ app.layout = html.Div([
     
     html.Hr(),
 
-    html.Div(id='days', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'20px'}),
+    # Slider date input for as far as 30 days in the past
+    #dcc.Slider(
+    #    id='daysSlider',
+    #    min=0,
+    #    max=30,
+    #    value=14,
+    #    step=1,
+    #    marks={
+    #        0: {'label':'0 Days', 'style':{'color': 'purple', 'font-face': 'bold'}},
+    #        5: {'label': '5 Days'},
+    #        10: {'label': '10 Days'},
+    #        15: {'label': '15 Days'},
+    #        20: {'label':'20 Days'},
+    #        25: {'label':'25 Days'},
+    #        30: {'label':'30 Days', 'style':{'color': 'purple', 'font-face': 'bold'}}
+    #    }
+    #),
 
-    dcc.Slider(
-        id='daysSlider',
-        min=0,
-        max=30,
-        value=14,
-        step=1,
-        marks={
-            0: {'label':'0 Days', 'style':{'color': 'purple', 'font-face': 'bold'}},
-            5: {'label': '5 Days'},
-            10: {'label': '10 Days'},
-            15: {'label': '15 Days'},
-            20: {'label':'20 Days'},
-            25: {'label':'25 Days'},
-            30: {'label':'30 Days', 'style':{'color': 'purple', 'font-face': 'bold'}}
-        }
-    ),
+    html.Div('Enter Start and End Date for Work Log', style={'marginLeft': '20px', 'fontWeight': 'bold', 'fontStyle': 'italic'}),
+
+    html.Div(children=[dcc.DatePickerRange(
+                            id='datePickerRange',
+                            min_date_allowed= date.today() - timedelta(days=int(365)),
+                            max_date_allowed= date.today(),
+                            initial_visible_month=date.today(),
+                            end_date=date.today(),
+                            start_date = date.today() - timedelta(days=int(2))
+                            ),
+                       html.Span(id='days', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'20px'}),
+                       ],
+             style={'marginLeft': '20px'}),
 
     html.Br(),
 
     html.Div(children=[html.Button('Switch Table', id='convert'), 
-                       html.Span(id='ticketCount', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'20px'}),
-                       html.Span(id='timeTaken', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'6px'})], 
+                       html.Span(id='ticketCount', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'20px'})
+                       ], 
              style={'marginLeft': '20px'}),
     
     html.Br(),
@@ -78,8 +92,8 @@ app.layout = html.Div([
                      {'name': 'Issue key', 'id': 'Issue key'},
                      {'name': 'Summary', 'id': 'Summary'},
                      {'name': 'Assignee name', 'id': 'Assignee name'},
-                     {'name': 'Estimate', 'id': 'Estimate'},
-                     {'name': 'Time spent', 'id': 'Time spent'},
+                     {'name': 'Estimate (hrs)', 'id': 'Estimate (hrs)'},
+                     {'name': 'Time spent (hrs)', 'id': 'Time spent (hrs)'},
                      {'name': 'Logged Date Time', 'id': 'Logged Date Time'}
                     ],
             style_cell={'textAlign': 'left', 'textOverflow': 'ellipsis', 'minWidth': '20px', 'maxWidth': '400px'},
@@ -132,8 +146,8 @@ app.layout = html.Div([
                             data=[],
                             columns=[
                                     {'name': 'Team', 'id': 'Team'},
-                                    {'name': 'Allocation', 'id': 'Allocation'},
-                                    {'name': 'Utilization', 'id': 'Utilization'}
+                                    {'name': 'Allocation (%)', 'id': 'Allocation (%)'},
+                                    {'name': 'Utilization (%)', 'id': 'Utilization (%)'}
                                     ],
                             style_cell={'textAlign': 'left', 'textOverflow': 'ellipsis', 'minWidth': '20px', 'maxWidth': '400px'},
                             style_table={'overflowX': 'auto', 'overflowY': 'auto'},
@@ -206,12 +220,24 @@ def generalFormat(style, color_range, worksheet):
                                             'format': style})
 
 #Adjust the past days slider
+#@app.callback([
+#    Output('days', 'children'),
+#    Input('daysSlider', 'value')
+#])
+#def sliderUpdate(days):
+#    return ['{} Days'.format(days)]
+
+#Adjust the past days slider
 @app.callback([
     Output('days', 'children'),
-    Input('daysSlider', 'value')
+    Input('datePickerRange', 'start_date'),
+    Input('datePickerRange', 'end_date')
 ])
-def sliderUpdate(days):
-    return ['{} Days'.format(days)]
+def sliderUpdate(start_Date, end_Date):
+    startDate = date.fromisoformat(start_Date)
+    endDate = date.fromisoformat(end_Date)
+    diff = endDate - startDate
+    return ['{} Days'.format(diff.days)]
 
 #Download Summary file
 @app.callback([
@@ -290,13 +316,13 @@ def selectName (names, graph):
     #If nothing is selected then return the default overall bar graph
     trace1 = go.Bar(
                     x = workLogAlpha['Assignee'],
-                    y = workLogAlpha['Allocation'],
+                    y = workLogAlpha['Allocation (%)'],
                     marker = {'color': 'rgb(199, 153, 185)'},
                     name = 'Allocation'
     )
     trace2 = go.Bar(
                     x = workLogAlpha['Assignee'],
-                    y = workLogAlpha['Utilization'],
+                    y = workLogAlpha['Utilization (%)'],
                     marker = {'color': 'darkviolet'},
                     name = 'Utilization'
     )
@@ -305,11 +331,11 @@ def selectName (names, graph):
     #If bubble graph is selected
     if graph == 'Bubble':
         mode = 'markers'
-        marker = dict(size=2*workLogAlpha['Utilization'])
+        marker = dict(size=1.5*workLogAlpha['Utilization (%)'])
         data = [
             go.Scatter(
                 x = workLogAlpha['Assignee'],
-                y = workLogAlpha['Utilization'],
+                y = workLogAlpha['Utilization (%)'],
                 mode = mode,
                 marker = marker
             )
@@ -318,13 +344,13 @@ def selectName (names, graph):
     elif graph == 'Bar':
          trace1 = go.Bar(
                     x = workLogAlpha['Assignee'],
-                    y = workLogAlpha['Allocation'],
+                    y = workLogAlpha['Allocation (%)'],
                     marker = {'color': 'rgb(199, 153, 185)'},
                     name = 'Estimate'
              )
          trace2 = go.Bar(
                         x = workLogAlpha['Assignee'],
-                        y = workLogAlpha['Utilization'],
+                        y = workLogAlpha['Utilization (%)'],
                         marker = {'color': 'darkviolet'},
                         name = 'Time spent'
                  )
@@ -335,8 +361,8 @@ def selectName (names, graph):
         data = [
             go.Heatmap(
             x = workLogAlpha['Assignee'],
-            y = workLogAlpha['Utilization'],
-            z = workLogAlpha['Utilization'],
+            y = workLogAlpha['Utilization (%)'],
+            z = workLogAlpha['Utilization (%)'],
             colorscale = 'Jet',
             zmin = 5, zmax = 40 # add max/min color values to make each plot consistent
             )
@@ -345,14 +371,14 @@ def selectName (names, graph):
     elif graph == 'Line':
         trace1 = go.Scatter(
                     x = workLogAlpha['Assignee'],
-                    y = workLogAlpha['Utilization'],
+                    y = workLogAlpha['Utilization (%)'],
                     mode = mode,
                     marker = marker,
                     name = 'Utilization'
                 )
         trace2 = go.Scatter(
                     x = workLogAlpha['Assignee'],
-                    y = workLogAlpha['Allocation'],
+                    y = workLogAlpha['Allocation (%)'],
                     mode = mode,
                     marker = {'size': 12, 'symbol': 'circle-dot', 'color': 'rgb(199, 153, 185)'},
                     name = 'Allocation'
@@ -379,10 +405,10 @@ def selectName (names, graph):
                 tempNameList = workLogAlpha[workLogAlpha.Assignee == name]
                 if graph == 'Bubble':
                     mode = 'markers'
-                    marker = dict(size=3*tempNameList['Utilization'])
+                    marker = dict(size=2*tempNameList['Utilization (%)'])
                     data.append(go.Scatter(
                         x = tempNameList.Assignee,
-                        y = tempNameList['Utilization'],
+                        y = tempNameList['Utilization (%)'],
                         mode = mode,
                         name = name,
                         marker = marker
@@ -390,14 +416,14 @@ def selectName (names, graph):
                 elif graph == 'Bar':
                     data.append(go.Bar(
                         x = tempNameList.Assignee,
-                        y = tempNameList['Utilization'],
+                        y = tempNameList['Utilization (%)'],
                         name = name
                     ))
                 elif graph == 'Heatmap':
                     data.append(go.Heatmap(
                         x=tempNameList.Assignee,
-                        y=tempNameList['Utilization'],
-                        z=tempNameList['Utilization'],
+                        y=tempNameList['Utilization (%)'],
+                        z=tempNameList['Utilization (%)'],
                         colorscale='Jet',
                         zmin = 40, zmax = 100,
                         name = name
@@ -405,7 +431,7 @@ def selectName (names, graph):
                 elif graph == 'Line':
                     data.append(go.Scatter(
                         x = tempNameList.Assignee,
-                        y = tempNameList['Utilization'],
+                        y = tempNameList['Utilization (%)'],
                         name = name,
                         mode = mode,
                         marker = marker
@@ -413,7 +439,7 @@ def selectName (names, graph):
                 else:
                     data.append(go.Bar(
                         x = tempNameList.Assignee,
-                        y = tempNameList['Utilization'],
+                        y = tempNameList['Utilization (%)'],
                         name = name,
                     ))
             fig = {'data': data, 'layout': go.Layout(title = 'Overall Time Spent', xaxis = {'title': 'Assignee'}, yaxis = {'title': 'Utilization'}, hovermode='closest')}
@@ -442,30 +468,30 @@ def selectName (names, graph):
     Output('grouping-graph', 'figure'),
     Output('teamTable', 'data'),
     Output('ticketCount', 'children'),
-    Output('timeTaken', 'children'),
-    Input('daysSlider', 'value')
+    Input('datePickerRange', 'start_date'),
+    Input('datePickerRange', 'end_date')
 ])
-def jiraConnector(days):
-    global jiraData, workLog, workLogAlpha, dayCount, option, filename
+def jiraConnector(start_Date, end_Date):
+    global jiraData, workLog, workLogAlpha, option, filename, startDate, endDate
 
-    if days == dayCount:
+    if ((startDate == date.fromisoformat(start_Date)) and endDate == date.fromisoformat(end_Date)):
         raise PreventUpdate
-    else:
-        dayCount = days
-        print("-----------------------------------------------------------------")
+    #else:
+    #dayCount = days
+    print("-----------------------------------------------------------------")
 
     initial = 0
     size = 100
+    
+    startDate = date.fromisoformat(start_Date)
+    #startDate = startDate.strftime('%Y-%m-%d')
+    startDate = date.fromisoformat(start_Date)
+    #endDate = endDate.strftime('%Y-%m-%d')
+    endDate = date.fromisoformat(end_Date)
+    jql = 'worklogDate >= ' + start_Date + ' AND worklogDate <= ' + end_Date
+    print(jql)
 
-    #endDate = date.today()
-    #startDate = endDate - timedelta(days=int(days))
-    startDate = "2021-08-30"
-    endDate = "2021-09-12"
-    jql = 'worklogDate >= ' + startDate + ' AND worklogDate <= ' + endDate
-    startDate = datetime.strptime(startDate, '%Y-%m-%d')
-    endDate = datetime.strptime(endDate, '%Y-%m-%d')
-
-    jira = JIRA(options={'server': '<server>'}, basic_auth=('<username>', '<token>')) #Connecting to Jira cloud
+    jira = JIRA(options={'server': 'https://qordatainc.atlassian.net/'}, basic_auth=('uzair.islam@qordata.com', 'uxeZzpGkzK6FQvbieIgY1C70')) #Connecting to Jira cloud
     #jql='worklogDate >= -'+str(days)+'d' #The JQL on which the whole data is retrieved
 
     data_jira = []
@@ -492,7 +518,7 @@ def jiraConnector(days):
             #This makes a significant impact on the programs execution time
             for w in jira.worklogs(issue.key):
                 started = datetime.strptime(w.started[:-5], '%Y-%m-%dT%H:%M:%S.%f')
-                if not (startDate.date() <= started.date() <= endDate.date()):
+                if not (startDate <= started.date() <= endDate):
                     continue
                 timeSpent = timeSpent + w.timeSpentSeconds
                 issue_logDateTime = datetime.strptime(w.started[:-5], '%Y-%m-%dT%H:%M:%S.%f')
@@ -555,6 +581,8 @@ def jiraConnector(days):
     workLog.reset_index(inplace=True)
     workLog['Assignee name'] = workLog['Assignee name'].str.replace('.', ' ')
     workLog['Assignee name'] = workLog['Assignee name'].str.title()
+    jiraData['Assignee name'] = jiraData['Assignee name'].str.replace('.', ' ')
+    jiraData['Assignee name'] = jiraData['Assignee name'].str.title()
     
     #Leaves Data
     leaves = pd.read_excel('.\Input\Attendence.xlsx', na_values=['Present', 'Absent', 'Present, Time out is missing', 
@@ -616,7 +644,7 @@ def jiraConnector(days):
     #Excel engine for report generation
     
     #Setting filename and dataframes
-    filename = 'Delivery Report ' + str(datetime.strftime(startDate.date(), "%d%b%Y")) + '.xlsx'
+    filename = 'Delivery Report ' + str(datetime.strftime(startDate, "%d%b%Y")) + '.xlsx'
     df = pd.DataFrame()
     writer = pd.ExcelWriter('.\Output\{}'.format(filename), engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Delivery Report')
@@ -660,12 +688,12 @@ def jiraConnector(days):
     worksheet.write('E4', 'Team', subheader_fmt)
     worksheet.write('F4', 'Allocation', subheader_fmt)
     worksheet.write('G4', 'Utilization', subheader_fmt)
-    worksheet.merge_range('E17:G17', 'No. of leaves b/w ' + str(datetime.strftime(startDate.date(), "%b %d")) + ' - ' + str(datetime.strftime(endDate.date(), "%b %d")), avg_fmt)
+    worksheet.merge_range('E17:G17', 'No. of leaves b/w ' + str(datetime.strftime(startDate, "%b %d")) + ' - ' + str(datetime.strftime(endDate, "%b %d")), avg_fmt)
     worksheet.write('E18', 'Name', subheader_fmt)
     worksheet.merge_range('F18:G18', 'No. of Leaves', subheader_fmt)
 
     #Writing dataframes and formats
-    worksheet.merge_range('A1:G1', 'Allocation & Utilization: ' + str(datetime.strftime(startDate.date(), "%b %d")) + ' - ' + str(datetime.strftime(endDate.date(), "%b %d, %Y")), merge_format_header)
+    worksheet.merge_range('A1:G1', 'Allocation & Utilization: ' + str(datetime.strftime(startDate, "%b %d")) + ' - ' + str(datetime.strftime(endDate, "%b %d, %Y")), merge_format_header)
     currentRow = 4
     for team in departments:
         worksheet.merge_range('A{}:C{}'.format(currentRow, currentRow), team , merge_format_team)
@@ -783,21 +811,21 @@ def jiraConnector(days):
     workLogAlpha = defaultDf[['Assignee name', 'Department', 'Leaves', 'Allocation', 'Utilization']]
     workLogAlpha[['Allocation', 'Utilization']] = workLogAlpha[['Allocation', 'Utilization']].mul(100).round(2)
     workLogAlpha['Leaves'] = workLogAlpha['Leaves'].div(8)
-    workLogAlpha.rename(columns = {'Assignee name': 'Assignee', 'Department': 'Team'}, inplace=True)
+    workLogAlpha.rename(columns = {'Assignee name': 'Assignee', 'Department': 'Team', 'Allocation': 'Allocation (%)', 'Utilization': 'Utilization (%)'}, inplace=True)
     workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.replace('Muhammad ', '') #just replacing too many similar sir names 
     jiraData = jiraData[['Issue key', 'Summary', 'Assignee name', 'Estimate [Hours]', 'Time spent [Hours]', 'Logged Date Time']]
-    jiraData.rename(columns = {'Estimate [Hours]': 'Estimate', 'Time spent [Hours]': 'Time spent'}, inplace = True)
+    jiraData.rename(columns = {'Estimate [Hours]': 'Estimate (hrs)', 'Time spent [Hours]': 'Time spent (hrs)'}, inplace = True)
 
     #Main overall bar graph
     trace1 = go.Bar(
                     x = workLogAlpha['Assignee'],
-                    y = workLogAlpha['Allocation'],
+                    y = workLogAlpha['Allocation (%)'],
                     marker = {'color': 'rgb(199, 153, 185)'},
                     name = 'Estimate'
              )
     trace2 = go.Bar(
                     x = workLogAlpha['Assignee'],
-                    y = workLogAlpha['Utilization'],
+                    y = workLogAlpha['Utilization (%)'],
                     marker = {'color': 'darkviolet'},
                     name = 'Time spent'
              )
@@ -814,7 +842,8 @@ def jiraConnector(days):
     #Teamwise segregated pie chart
     team = groups.Department.tolist()
     groups[['Allocation', 'Utilization']] = groups[['Allocation', 'Utilization']].mul(100).round(2)
-    utilize = groups.Utilization.tolist()
+    groups.rename(columns = {'Allocation': 'Allocation (%)', 'Utilization': 'Utilization (%)', 'Department': 'Team'}, inplace = True)
+    utilize = groups['Utilization (%)'].tolist()
     trace3 = go.Pie(labels=team,
                     values=utilize
             )
@@ -825,10 +854,8 @@ def jiraConnector(days):
                 hovermode='closest'
             )
         }
-    #groups['Utilization'] = groups['Utilization'].round(2)
-    #groups['Allocation'] = groups['Allocation'].round(2)
-    #groups[['Allocation', 'Utilization']] = groups[['Allocation', 'Utilization']].mul(100).round(2)
-    groups.rename(columns = {'Department': 'Team'}, inplace = True)
+
+    #groups.rename(columns = {'Department': 'Team'}, inplace = True)
     groups.reset_index(inplace=True)
 
     #Preparing options (list of usernames in the drop down)
@@ -838,10 +865,11 @@ def jiraConnector(days):
         nameDict['value'] = name
         option.append(nameDict)
     
+    print('{} tickets retrieved in {} seconds'.format(len(jiraData), round(executionTime, 2)))
     print('Refreshed on: ', datetime.today())
 
     #Returning everything prepared so far to the dashboard
-    return [jiraData.to_dict('records'), html.Div(style={'display': 'None'}), figure, option, pie_figure, groups.to_dict('rows'), '{} tickets retrieved'.format(len(jiraData)), 'in {} seconds'.format(round(executionTime, 2))]
+    return [jiraData.to_dict('records'), html.Div(style={'display': 'None'}), figure, option, pie_figure, groups.to_dict('rows'), '{} tickets retrieved in {} seconds'.format(len(jiraData), round(executionTime, 2))]
 
 
 if __name__ == '__main__':
