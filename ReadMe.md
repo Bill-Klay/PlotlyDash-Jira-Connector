@@ -118,7 +118,7 @@ will be dispalyed.
 but since the retrieving a work log brings in the whole time logged rather than just the work that was logged in the data range provided *jira.worklog* was used to get the worklog list and traverse manually. 
 This increased the complexity to O(n*m) taking around 264 sec upto 4-5 mins to retrive and process the average of 620 tickets.\
 ![flow diagram](https://github.com/Bill-Klay/PlotlyDash-Jira-Connector/blob/master/images/Flow_Diagram.png) \
-The flow of the application can be observed in the flow chart described above. 
+The flow of the application can be observed in the flow chart described above. The employee list and leaves are a inhouse dependency can be opted out or adjusted accordingly.
 
 <!-- ROADMAP -->
 ## Roadmap
