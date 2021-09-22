@@ -68,7 +68,7 @@ app.layout = html.Div([
                             max_date_allowed= date.today(),
                             initial_visible_month=date.today(),
                             end_date=date.today(),
-                            start_date = date.today() - timedelta(days=int(14))
+                            start_date = date.today() - timedelta(days=int(2))
                             ),
                        html.Span(id='days', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'20px'}),
                        ],
@@ -616,8 +616,8 @@ def jiraConnector(start_Date, end_Date):
     groups = fuzzy_merge(groups, defaultDf, 'Assignee name', 'Assignee name', 90, 1)
     defaultDf = defaultDf.merge(groups, on='Assignee name', how='left')
     defaultDf.fillna(0, inplace = True)
-    defaultDf['EndDate'] = startDate
-    defaultDf['StartDate'] = endDate
+    defaultDf['EndDate'] = endDate
+    defaultDf['StartDate'] = startDate
     del workLog
 
     #Calculating Allocation and Utilization
@@ -778,8 +778,8 @@ def jiraConnector(start_Date, end_Date):
     cmd = "py Pywin32_Excel.py {}".format(filename)
     p = subprocess.Popen(cmd, shell=True)
     out, err = p.communicate()
-    print("Returns from subprocess: ")
-    print(err)
+    print("Returns from subprocess:", end=' ')
+    print(err, end=' ')
     print(out)
 
     #Database schema
@@ -799,22 +799,22 @@ def jiraConnector(start_Date, end_Date):
     #GO
 
     #Database entry for PowerBI dashboards
-    #defaultDf[['Allocation', 'Utilization']] = defaultDf[['Allocation', 'Utilization']].mul(100)
-    #server = 'PROD-LPT-69\SQL' 
-    #database = 'Cost' 
-    #conn = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER="+server+';DATABASE='+database+';Trusted_Connection=yes;')
-    #cursor = conn.cursor()
-    #cursor.execute("TRUNCATE TABLE DeliveryReport")
+    defaultDf[['Allocation', 'Utilization']] = defaultDf[['Allocation', 'Utilization']].mul(100).round(2)
+    server = 'US-BCKND' 
+    database = 'Costing' 
+    conn = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER="+server+';DATABASE='+database+';Trusted_Connection=yes;')
+    cursor = conn.cursor()
+    cursor.execute("TRUNCATE TABLE DeliveryReport")
 
-    #for index, row in defaultDf.iterrows():
-    #    cursor.execute("INSERT INTO DeliveryReport (Team, Name, Allocation, Utilization, StartDate, EndDate) values(?,?,?,?,?,?);", 
-    #                   str(row.Department), str(row['Assignee name']), str(row.Allocation), str(row.Utilization), row.StartDate, row.EndDate)
-    #conn.commit()
-    #cursor.close()
+    for index, row in defaultDf.iterrows():
+        cursor.execute("INSERT INTO DeliveryReport (Team, Name, Allocation, Utilization, StartDate, EndDate) values(?,?,?,?,?,?);", 
+                       str(row.Department), str(row['Assignee name']), str(row.Allocation), str(row.Utilization), row.StartDate, row.EndDate)
+    conn.commit()
+    cursor.close()
 
     #Preparing multiple traces for default graphs
     workLogAlpha = defaultDf[['Assignee name', 'Department', 'Leaves', 'Allocation', 'Utilization']]
-    workLogAlpha[['Allocation', 'Utilization']] = workLogAlpha[['Allocation', 'Utilization']].mul(100).round(2)
+    #workLogAlpha[['Allocation', 'Utilization']] = workLogAlpha[['Allocation', 'Utilization']].mul(100).round(2)
     workLogAlpha['Leaves'] = workLogAlpha['Leaves'].div(8)
     workLogAlpha.rename(columns = {'Assignee name': 'Assignee', 'Department': 'Team', 'Allocation': 'Allocation (%)', 'Utilization': 'Utilization (%)'}, inplace=True)
     workLogAlpha['Assignee'] = workLogAlpha['Assignee'].str.replace('Muhammad ', '') #just replacing too many similar sir names 
