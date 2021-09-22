@@ -17,6 +17,7 @@ from fuzzywuzzy import process
 import numpy as np
 import win32com.client as win32
 import time
+import subprocess
 
 warnings.filterwarnings('ignore')
 
@@ -67,7 +68,7 @@ app.layout = html.Div([
                             max_date_allowed= date.today(),
                             initial_visible_month=date.today(),
                             end_date=date.today(),
-                            start_date = date.today() - timedelta(days=int(2))
+                            start_date = date.today() - timedelta(days=int(14))
                             ),
                        html.Span(id='days', style={'font-size': '1.2em', 'font-family':'Calibri', 'marginLeft':'20px'}),
                        ],
@@ -155,7 +156,7 @@ app.layout = html.Div([
                             style_header={'fontWeight': 'bold', 'backgroundColor': '#c799b9', 'fontFamily': 'Calibri', 'fontStyle': 'italic'},
                             style_data={'fontFamily': 'Calibri'},
                             style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'}]
-                        ), style={'marginRight': '20px', 'width': '50%', 'float': 'left', 'marginTop': '120px'})
+                        ), style={'marginRight': '20px', 'width': '49%', 'float': 'left', 'marginTop': '120px', 'marginLeft': '2px'})
                     ], style={'display': 'flex'}),
     html.Br()
 
@@ -491,7 +492,13 @@ def jiraConnector(start_Date, end_Date):
     jql = 'worklogDate >= ' + start_Date + ' AND worklogDate <= ' + end_Date
     print(jql)
 
-    jira = JIRA(options={'server': 'https://qordatainc.atlassian.net/'}, basic_auth=('uzair.islam@qordata.com', 'uxeZzpGkzK6FQvbieIgY1C70')) #Connecting to Jira cloud
+    #Read credentials
+    credentialFile = open('Credentials.txt', 'r')
+    line = credentialFile.read().splitlines()
+    credentialFile.close()
+
+
+    jira = JIRA(options={'server': line[0]}, basic_auth=(line[1], line[2])) #Connecting to Jira cloud
     #jql='worklogDate >= -'+str(days)+'d' #The JQL on which the whole data is retrieved
 
     data_jira = []
@@ -764,18 +771,16 @@ def jiraConnector(start_Date, end_Date):
     worksheet.write('G{}'.format(currentRow), '0', general_border_fmt)
     writer.save()
 
-    #Print filename
+    #Log filename
     print(filename)
 
     #Python windows api to expand the sheet to adjust to the text
-    #excel = win32.gencache.EnsureDispatch('Excel.Application')
-    #wb = excel.Workbooks.Open('D:\My Projects\Jira Connector\Jira Connector Application\{}'.format(filename))
-    #ws = wb.Worksheets("Delivery Report")
-    #ws.Columns.AutoFit()
-    #ws = wb.Worksheets("Jira Data")
-    #ws.Columns.AutoFit()
-    #wb.Save()
-    #excel.Application.Quit()
+    cmd = "py Pywin32_Excel.py {}".format(filename)
+    p = subprocess.Popen(cmd, shell=True)
+    out, err = p.communicate()
+    print("Returns from subprocess: ")
+    print(err)
+    print(out)
 
     #Database schema
     #CREATE TABLE [dbo].[DeliveryReport](
