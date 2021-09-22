@@ -804,10 +804,10 @@ def jiraConnector(start_Date, end_Date):
     database = 'Costing' 
     conn = pyodbc.connect("DRIVER={ODBC Driver 17 for SQL Server};SERVER="+server+';DATABASE='+database+';Trusted_Connection=yes;')
     cursor = conn.cursor()
-    cursor.execute("TRUNCATE TABLE DeliveryReport")
+    cursor.execute("TRUNCATE TABLE DeliveryTeamReportV2")
 
     for index, row in defaultDf.iterrows():
-        cursor.execute("INSERT INTO DeliveryReport (Team, Name, Allocation, Utilization, StartDate, EndDate) values(?,?,?,?,?,?);", 
+        cursor.execute("INSERT INTO DeliveryTeamReportV2 (Team, Name, Allocation, Utilization, StartDate, EndDate) values(?,?,?,?,?,?);", 
                        str(row.Department), str(row['Assignee name']), str(row.Allocation), str(row.Utilization), row.StartDate, row.EndDate)
     conn.commit()
     cursor.close()
