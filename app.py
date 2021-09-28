@@ -596,6 +596,8 @@ def jiraConnector(start_Date, end_Date):
                                                      'Present, Request Pending', 'Holiday', 'Absent, Request Pending'])
     leaves = leaves[['Employee', 'Schedule Date IN', 'Remarks']]
     leaves.dropna(inplace=True)
+    leaves = leaves.replace({'Employee': {'Muhammad Haris Shaikh': 'Haris Sheikh', 'Shaikh Muhammad Arsalan': 'Shaikh Arsalan', 'Rabail Muhammad Ali': 'Rabail Ali', 
+                                          'Syed Muhammad Asaad Khurshid': 'Syed Asaad', 'Syeda Mahham Batool': 'Maham Batool'}})
     gazettedHoliday = leaves[leaves['Employee'] == 'Muhammad Bilal Khan']
     gazettedHoliday = gazettedHoliday[gazettedHoliday['Remarks'] == 'GazettedHoliday']['Schedule Date IN'].tolist()
       
@@ -878,7 +880,4 @@ def jiraConnector(start_Date, end_Date):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
-
-
-# Current known issue is the leaves data not matching the entered date
+    app.run_server(debug=False)
